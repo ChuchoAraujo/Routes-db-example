@@ -190,9 +190,45 @@ def add_favorite_people(people_id):
     
     return jsonify({'favorite': favorite.serialize()}), 201
 
+## DELETE PLANET FAVORITES
+@api.route('/favorite/planet/<int:planet_id>', methods=['DELETE'])
+def delete_favorite_planet(planet_id):
+    # Obtener el id del usuario desde el cuerpo de la solicitud
+    user_id = request.get_json().get('user_id')
+    
+    if not user_id:
+        return jsonify({'message': 'User ID is required.'}), 400
+    
+    # Verificar si el usuario ha marcado este planeta como favorito
+    favorite = Favorites.query.filter_by(user_id=user_id, planet_id=planet_id).first()
+    if not favorite:
+        return jsonify({'message': 'This planet is not in your favorites list.'}), 404
+    
+    # Eliminar el planeta favorito de la lista de favoritos del usuario
+    db.session.delete(favorite)
+    db.session.commit()
+    
+    return jsonify({'message': favorite.serialize()}), 200
 
-
-
+## DELETE PEOPLE FAVORITES
+@api.route('/favorite/people/<int:people_id>', methods=['DELETE'])
+def delete_favorite_people(people_id):
+    # Obtener el id del usuario desde el cuerpo de la solicitud
+    user_id = request.get_json().get('user_id')
+    
+    if not user_id:
+        return jsonify({'message': 'User ID is required.'}), 400
+    
+    # Verificar si el usuario ha marcado este planeta como favorito
+    favorite = Favorites.query.filter_by(user_id=user_id, people_id=people_id).first()
+    if not favorite:
+        return jsonify({'message': 'This planet is not in your favorites list.'}), 404
+    
+    # Eliminar el planeta favorito de la lista de favoritos del usuario
+    db.session.delete(favorite)
+    db.session.commit()
+    
+    return jsonify({'message': favorite.serialize()}), 200
 
 
 
