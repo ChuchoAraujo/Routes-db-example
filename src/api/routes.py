@@ -7,12 +7,33 @@ from api.utils import generate_sitemap, APIException
 
 api = Blueprint('api', __name__)
 
+############################# TABLA USER ############################################
 
-@api.route('/hello', methods=['POST', 'GET'])
-def handle_hello():
+@api.route('/user', methods=['POST'])
+def create_user():
+    body = request.get_json()
+    new_user = User(body['user_name'], body['email'], body['password'])
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify(new_user.serialize()), 200
 
-    response_body = {
-        "message": "Hello! I'm a message that came from the backend, check the network tab on the google inspector and you will see the GET request"
-    }
+@api.route('/user', methods=['GET'])
+def get_all_users():
+    all_users = User.query.all()
+    all_users_serializable = list(map(lambda user: user.serialize(), all_users))
+    return jsonify(all_users_serializable)
 
-    return jsonify(response_body), 200
+@api.route('/user/<int:user_id>', methods=['GET'])
+def get_user_by_id(user_id):
+    one_user = User.query.get(user_id)
+    return jsonify(one_user.serialize()), 200
+
+@api.route('/user/<int:user_id>', methods=['DELETE'])
+def delete_user_by_id(user_id):
+    user = User.query.get(user_id)
+    if user:
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({"msg": user.serialize()}), 200
+    else:
+        return jsonify({"error": "User not found"}), 404
