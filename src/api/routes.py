@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, People
+from api.models import db, User, People, Planet
 from api.utils import generate_sitemap, APIException
 
 api = Blueprint('api', __name__)
@@ -70,4 +70,40 @@ def delete_people(people_id):
     if one_people:
         db.session.delete(one_people)
         db.session.commit()
-        return jsonify({'people': one_people.serialize})
+        return jsonify({'people': one_people.serialize()})
+    else:
+        return jsonify({"error": "User not found"}), 404
+
+############################# TABLA PLANET ############################################
+
+@api.route('/planet', methods=['GET'])
+def get_planet():
+    all_planet = Planet.query.all()
+    all_planet_serializable = list(map(lambda planet: planet.serialize(), all_planet))
+    return jsonify({'planet': all_planet_serializable})
+
+@api.route('/planet', methods=['POST'])
+def create_planet():
+    body = request.get_json()
+    new_planet = Planet(body['name'], body['climate'])
+    db.session.add(new_planet)
+    db.session.commit()
+    return jsonify({'people': new_planet.serialize()})
+
+@api.route('/planet/<int:planet_id>', methods=['GET'])
+def get_one_planet(planet_id):
+    one_planet = Planet.query.get(planet_id)
+    if one_planet:
+        return jsonify({'planet': one_planet.serialize()}), 200
+    else:
+        return jsonify({'msg': 'Id not exist!'})
+
+@api.route('/planet/<int:planet_id>', methods=['DELETE'])
+def delete_planet(planet_id):
+    one_planet = Planet.query.get(planet_id)
+    if one_planet:
+        db.session.delete(one_planet)
+        db.session.commit()
+        return jsonify({'planet': one_planet.serialize()})
+    else:
+        return jsonify({"error": "Planet not found"}), 404

@@ -37,3 +37,20 @@ class People(db.Model):
             "description": self.description,
             # do not serialize the password, its a security breach
         }
+
+class Planet(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), unique=True, nullable=False)
+    climate = db.Column(db.String(80), unique=False, nullable=False)
+
+    def __init__(self, name, climate):
+        self.name = name
+        self.climate = climate
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "climate": self.climate,
+            # do not serialize the password, its a security breach
+        }
