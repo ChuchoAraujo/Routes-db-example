@@ -65,8 +65,8 @@ class Favorites(db.Model):
     planet_id = db.Column(db.Integer, db.ForeignKey('planet.id'))  
     
     user = db.relationship('User', backref='favorites') # relacion tabla
-    planet = db.relationship('Planet', backref='favorites') # relacion tabla
-    people = db.relationship('People', backref='favorites') # relacion tabla
+    planet = db.relationship('Planet', lazy='joined', backref='favorites')
+    people = db.relationship('People', lazy='joined', backref='favorites')
 
     def serialize(self):
         return {

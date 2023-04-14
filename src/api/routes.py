@@ -128,24 +128,22 @@ def get_all_favorites():
     return jsonify(serialized_favorites), 200
 
 ## GET USERS FAVORITES
-@api.route('/users/favorites', methods=['GET'])
-def get_favorites():
-    user_id = request.json.get('user_id')
-
-    if not user_id:
-        return jsonify({'msg': 'User ID is required.'}), 400
-
+@api.route('/users/<int:user_id>/favorites', methods=['GET'])
+def get_user_favorites(user_id):
     user = User.query.filter_by(id=user_id).first()
 
     if not user:
         return jsonify({'msg': 'User not found.'}), 404
 
-    favorites = list(map(lambda f: f.serialize(), user.favorites))
+    favorites = Favorites.query.filter_by(user_id=user_id).all()
 
     if not favorites:
         return jsonify({'msg': 'No favorites found for the specified user.'}), 404
 
-    return jsonify({'favorites': favorites}), 200
+    serialized_favorites = [favorite.serialize() for favorite in favorites]
+
+    return jsonify({'favorites': serialized_favorites}), 200
+
 
 
 ## POST PLANET FAVORITES
@@ -222,7 +220,7 @@ def delete_favorite_people(people_id):
     # Verificar si el usuario ha marcado este planeta como favorito
     favorite = Favorites.query.filter_by(user_id=user_id, people_id=people_id).first()
     if not favorite:
-        return jsonify({'message': 'This planet is not in your favorites list.'}), 404
+        return jsonify({'message': 'This people is not in your favorites list.'}), 404
     
     # Eliminar el planeta favorito de la lista de favoritos del usuario
     db.session.delete(favorite)
@@ -246,6 +244,24 @@ def delete_favorite_people(people_id):
 
 
 
+# @api.route('/users/favorites', methods=['GET'])
+# def get_favorites():
+#     user_id = request.json.get('user_id')
+
+#     if not user_id:
+#         return jsonify({'msg': 'User ID is required.'}), 400
+
+#     user = User.query.filter_by(id=user_id).first()
+
+#     if not user:
+#         return jsonify({'msg': 'User not found.'}), 404
+
+#     favorites = list(map(lambda f: f.serialize(), user.favorites))
+
+#     if not favorites:
+#         return jsonify({'msg': 'No favorites found for the specified user.'}), 404
+
+#     return jsonify({'favorites': favorites}), 200
 
 
 
